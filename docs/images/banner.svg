@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="220" viewBox="0 0 920 220">
+  <!-- Background -->
+  <rect width="920" height="220" fill="#f0fdf4"/>
+  <!-- Top accent bar -->
+  <rect width="920" height="6" fill="#16a34a"/>
+  <!-- Bottom accent bar -->
+  <rect y="214" width="920" height="6" fill="#16a34a"/>
+
+  <!-- Logo box -->
+  <rect x="40" y="52" width="80" height="80" rx="12" fill="#16a34a"/>
+  <text x="80" y="92" fill="white" font-family="Helvetica,Arial,sans-serif" font-size="40" font-weight="bold" text-anchor="middle" dominant-baseline="middle">NF</text>
+
+  <!-- Project name -->
+  <text x="142" y="88" fill="#14532d" font-family="Helvetica,Arial,sans-serif" font-size="44" font-weight="bold">NexusForum</text>
+
+  <!-- Tagline -->
+  <text x="144" y="120" fill="#15803d" font-family="Helvetica,Arial,sans-serif" font-size="14">Two-tier cache  →  Kafka async decoupling  →  ElasticSearch full-text search</text>
+
+  <!-- Badge 1: Spring Boot -->
+  <rect x="144" y="148" width="118" height="26" rx="5" fill="#16a34a"/>
+  <text x="203" y="161" fill="white" font-family="Helvetica,Arial,sans-serif" font-size="11" text-anchor="middle" dominant-baseline="middle">Spring Boot 2.x</text>
+
+  <!-- Badge 2: Kafka -->
+  <rect x="272" y="148" width="80" height="26" rx="5" fill="#1c1917"/>
+  <text x="312" y="161" fill="white" font-family="Helvetica,Arial,sans-serif" font-size="11" text-anchor="middle" dominant-baseline="middle">Kafka 2.3</text>
+
+  <!-- Badge 3: ElasticSearch -->
+  <rect x="362" y="148" width="120" height="26" rx="5" fill="#f59e0b"/>
+  <text x="422" y="161" fill="white" font-family="Helvetica,Arial,sans-serif" font-size="11" text-anchor="middle" dominant-baseline="middle">ElasticSearch 6.4</text>
+
+  <!-- Badge 4: Redis -->
+  <rect x="492" y="148" width="72" height="26" rx="5" fill="#dc2626"/>
+  <text x="528" y="161" fill="white" font-family="Helvetica,Arial,sans-serif" font-size="11" text-anchor="middle" dominant-baseline="middle">Redis</text>
+
+  <!-- Badge 5: Caffeine -->
+  <rect x="574" y="148" width="88" height="26" rx="5" fill="#0891b2"/>
+  <text x="618" y="161" fill="white" font-family="Helvetica,Arial,sans-serif" font-size="11" text-anchor="middle" dominant-baseline="middle">Caffeine L1</text>
+
+  <!-- Card 1: 20× QPS -->
+  <rect x="716" y="22" width="184" height="78" rx="8" fill="white" stroke="#16a34a" stroke-width="2"/>
+  <rect x="716" y="22" width="5" height="78" rx="2" fill="#16a34a"/>
+  <text x="732" y="46" fill="#14532d" font-family="Helvetica,Arial,sans-serif" font-size="13" font-weight="bold">20× QPS Boost</text>
+  <text x="732" y="66" fill="#6b7280" font-family="Helvetica,Arial,sans-serif" font-size="10">Caffeine L1 + Redis L2</text>
+  <text x="732" y="82" fill="#6b7280" font-family="Helvetica,Arial,sans-serif" font-size="10">hot-post pre-warming</text>
+
+  <!-- Card 2: 40% latency cut -->
+  <rect x="716" y="116" width="184" height="78" rx="8" fill="white" stroke="#7c3aed" stroke-width="2"/>
+  <rect x="716" y="116" width="5" height="78" rx="2" fill="#7c3aed"/>
+  <text x="732" y="140" fill="#14532d" font-family="Helvetica,Arial,sans-serif" font-size="13" font-weight="bold">40% Latency Cut</text>
+  <text x="732" y="162" fill="#6b7280" font-family="Helvetica,Arial,sans-serif" font-size="10">Kafka async decoupling</text>
+  <text x="732" y="178" fill="#6b7280" font-family="Helvetica,Arial,sans-serif" font-size="10">fire-and-forget writes</text>
+</svg>

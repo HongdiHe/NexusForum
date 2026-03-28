@@ -1,3 +1,9 @@
+<h1 align="center">NexusForum</h1>
+
+<p align="center">
+  <em>Community forum built for 10K+ DAU — Two-tier cache · Kafka async decoupling · ElasticSearch full-text search</em>
+</p>
+
 <p align="center">
   <img src="https://img.shields.io/badge/Java-11+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" />
   <img src="https://img.shields.io/badge/Spring_Boot-2.1.5-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" />
@@ -6,11 +12,8 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
 </p>
 
-<h1 align="center">NexusForum</h1>
-
 <p align="center">
-  <b>Community forum built for 10K+ DAU</b><br/>
-  <i>Two-tier cache · Kafka async decoupling · ElasticSearch full-text search · Redis advanced data structures</i>
+  <img src="docs/images/banner.svg" alt="NexusForum Banner" width="920" />
 </p>
 
 <p align="center">
