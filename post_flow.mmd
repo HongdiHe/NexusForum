@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant User
+    participant Controller
+    participant Service
+    participant DB as MySQL
+    participant MQ as Kafka
+    participant ES as Elasticsearch
+    
+    Note over User, ES: 核心流程：发帖与搜索同步 (异步解耦)
+    
+    User->>Controller: 1. 发布帖子 (Title, Content)
+    Controller->>Service: 2. 调用业务方法
+    Service->>Service: 2.1 敏感词过滤 (Trie Tree)
+    Service->>DB: 2.2 保存帖子数据
+    DB-->>Service: Success
+    
+    Service->>MQ: 3. 发送 "发帖事件" (异步)
+    MQ-->>Service: ACK
+    
+    Service-->>Controller: 返回结果
+    Controller-->>User: 响应 "发布成功"
+    
+    par 异步处理 (解耦)
+        MQ->>Service: 4. 消费 "发帖事件" (EventConsumer)
+        Service->>ES: 5. 将帖子保存到索引库 (Elasticsearch)
+        ES-->>Service: Success
+    end

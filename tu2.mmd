@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant Client as 客户端
+    participant LC as LikeController
+    participant HH as HostHolder
+    participant LS as LikeService
+    participant EP as EventProducer
+    participant RT as RedisTemplate
+
+    Client->>LC: POST /like (entityType, entityId, entityUserId, postId)
+
+    LC->>HH: getUser()
+    HH-->>LC: User对象
+
+    LC->>LS: like(userId, entityType, entityId, entityUserId)
+    LS-->>LC: void
+
+    LC->>LS: findEntityLikeCount(entityType, entityId)
+    LS-->>LC: likeCount
+
+    LC->>LS: findEntityLikeStatus(entityType, entityId, userId)
+    LS-->>LC: likeStatus
+
+    alt likeStatus == 1 (点赞成功)
+        LC->>LC: 创建Event对象
+        LC->>EP: fireEvent(event)
+        EP-->>LC: void
+
+        alt entityType == ENTITY_TYPE_POST (帖子类型)
+            LC->>RT: opsForSet().add(postScoreKey, postId)
+            RT-->>LC: void
+        end
+    end
+
+    LC->>LC: CommunityUtil.getJSONString(0, null, map)
+    LC-->>Client: JSON响应 {likeCount, likeStatus}

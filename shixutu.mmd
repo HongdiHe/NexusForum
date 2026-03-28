@@ -1,0 +1,99 @@
+sequenceDiagram
+    autonumber
+
+    box 表现层 (Controller Layer)
+        participant Client as 客户端/浏览器
+        participant LC as LikeController
+    end
+
+    box 业务层 (Service Layer)
+        participant LS as LikeService
+        participant EP as EventProducer
+    end
+
+    box 数据层 (Data Access Layer)
+        participant RT as RedisTemplate
+        participant KT as KafkaTemplate
+    end
+
+    box 工具层 (Util Layer)
+        participant HH as HostHolder
+        participant RKU as RedisKeyUtil
+        participant CU as CommunityUtil
+    end
+
+%% ===== 表现层处理 =====
+    Client->>LC: 1. POST /like 请求
+    Note over LC: 【表现层】接收请求，参数绑定
+
+    LC->>HH: 2. getUser() 获取当前用户
+    HH-->>LC: User对象
+
+%% ===== 业务层处理 =====
+    LC->>LS: 3. like(userId, entityType, entityId, entityUserId)
+    Note over LS: 【业务层】执行点赞业务逻辑
+
+    LS->>RKU: 4. getEntityLikeKey()
+    RKU-->>LS: entityLikeKey
+    LS->>RKU: 5. getUserLikeKey()
+    RKU-->>LS: userLikeKey
+
+%% ===== 数据层处理 =====
+    LS->>RT: 6. execute(SessionCallback) 事务操作
+    Note over RT: 【数据层】Redis事务操作
+    RT->>RT: 7. isMember() 判断是否已点赞
+    alt 已点赞 - 取消点赞
+        RT->>RT: 8a. remove() 移除点赞记录
+        RT->>RT: 9a. decrement() 用户获赞数-1
+    else 未点赞 - 添加点赞
+        RT->>RT: 8b. add() 添加点赞记录
+        RT->>RT: 9b. increment() 用户获赞数+1
+    end
+    RT-->>LS: 事务执行结果
+    LS-->>LC: void
+
+%% ===== 业务层查询 =====
+    LC->>LS: 10. findEntityLikeCount()
+    Note over LS: 【业务层】查询点赞数
+    LS->>RKU: getEntityLikeKey()
+    RKU-->>LS: entityLikeKey
+    LS->>RT: 11. opsForSet().size()
+    Note over RT: 【数据层】查询Set大小
+    RT-->>LS: likeCount
+    LS-->>LC: likeCount
+
+    LC->>LS: 12. findEntityLikeStatus()
+    Note over LS: 【业务层】查询点赞状态
+    LS->>RKU: getEntityLikeKey()
+    RKU-->>LS: entityLikeKey
+    LS->>RT: 13. opsForSet().isMember()
+    Note over RT: 【数据层】查询成员关系
+    RT-->>LS: boolean
+    LS-->>LC: likeStatus (1或0)
+
+%% ===== 触发事件 =====
+    alt likeStatus == 1 (点赞成功，需要通知)
+        Note over LC: 【表现层】构建Event对象
+        LC->>EP: 14. fireEvent(event)
+        Note over EP: 【业务层】发送事件消息
+        EP->>KT: 15. send(topic, jsonString)
+        Note over KT: 【数据层】发送Kafka消息
+        KT-->>EP: void
+        EP-->>LC: void
+
+        alt entityType == POST (帖子类型)
+            LC->>RKU: 16. getPostScoreKey()
+            RKU-->>LC: postScoreKey
+            LC->>RT: 17. opsForSet().add(key, postId)
+            Note over RT: 【数据层】记录待计算分数的帖子
+            RT-->>LC: void
+        end
+    end
+
+%% ===== 返回响应 =====
+    LC->>CU: 18. getJSONString(0, null, map)
+    Note over CU: 【工具层】构建JSON响应
+    CU-->>LC: JSON字符串
+
+    LC-->>Client: 19. 返回JSON响应
+    Note over Client: {likeCount, likeStatus}

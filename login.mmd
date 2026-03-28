@@ -1,0 +1,86 @@
+sequenceDiagram
+    autonumber
+
+    box 表现层 (Controller)
+        participant Client as 客户端
+        participant LC as LoginController
+        participant Model as Model
+    end
+
+    box 工具层 (Util)
+        participant SU as StringUtils
+        participant RKU as RedisKeyUtil
+    end
+
+    box 业务层 (Service)
+        participant US as UserService
+    end
+
+    box 数据层 (DAO)
+        participant RT as RedisTemplate
+    end
+
+    Client->>LC: POST /login<br/>(username, password, code, rememberme, kaptchaOwner)
+
+%% ===== 第一步：验证码校验 =====
+    rect rgb(255, 250, 230)
+        Note over LC: 【表现层】验证码校验
+
+        LC->>SU: isNotBlank(kaptchaOwner)
+        Note over SU: 【工具层】判空
+        SU-->>LC: true/false
+
+        alt kaptchaOwner 不为空
+            LC->>RKU: getKaptchaKey(kaptchaOwner)
+            Note over RKU: 【工具层】生成Key
+            RKU-->>LC: kaptchaKey
+
+            LC->>RT: opsForValue().get(kaptchaKey)
+            Note over RT: 【数据层】查询Redis
+            RT-->>LC: kaptcha
+        else kaptchaOwner 为空
+            LC->>LC: kaptcha = null
+        end
+
+        LC->>SU: isBlank(kaptcha)
+        SU-->>LC: true/false
+        LC->>SU: isBlank(code)
+        SU-->>LC: true/false
+
+        alt kaptcha为空 || code为空 || 验证码不匹配
+            LC->>Model: addAttribute("codeMsg", "验证码不正确!")
+            Note over Model: 【表现层】存储错误信息
+            Model-->>LC: void
+            LC-->>Client: 返回 /site/login
+        end
+    end
+
+%% ===== 第二步：调用Service登录 =====
+    rect rgb(230, 250, 230)
+        Note over LC: 【表现层】计算过期时间
+        LC->>LC: expiredSeconds = rememberme ? 3600*24*100 : 3600*12
+
+        LC->>US: login(username, password, expiredSeconds)
+        Note over US: 【业务层】执行登录逻辑<br/>账号验证、密码验证、生成凭证
+        US-->>LC: Map结果
+    end
+
+%% ===== 第三步：处理登录结果 =====
+    rect rgb(230, 240, 255)
+        Note over LC: 【表现层】处理登录结果
+
+        alt map.containsKey("ticket") 登录成功
+            LC->>LC: 创建Cookie("ticket", ticket)
+            LC->>LC: cookie.setPath(contextPath)
+            LC->>LC: cookie.setMaxAge(expiredSeconds)
+            LC->>LC: cookie.setHttpOnly(true)
+            LC->>LC: response.addCookie(cookie)
+            LC-->>Client: redirect:/index
+        else 登录失败
+            LC->>Model: addAttribute("usernameMsg", map.get("usernameMsg"))
+            Model-->>LC: void
+            LC->>Model: addAttribute("passwordMsg", map.get("passwordMsg"))
+            Model-->>LC: void
+            LC-->>Client: 返回 /site/login
+        end
+    end

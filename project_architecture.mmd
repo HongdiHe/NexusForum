@@ -1,0 +1,50 @@
+graph TD
+    User[用户 (Browser/Client)]
+    
+    subgraph "Web Layer (表现层)"
+        Controller[Controller (Spring MVC)]
+        Interceptor[Interceptors (LoginTicket, LoginRequired)]
+        Advice[GlobalExceptionAdvice]
+    end
+    
+    subgraph "Service Layer (业务层)"
+        Service[Services (User, DiscussPost, Like, ...)]
+        Aspect[ServiceLogAspect (AOP)]
+        Sensitive[SensitiveFilter (Trie Tree)]
+    end
+    
+    subgraph "Data Layer (数据层)"
+        DAO[DAOs / Mappers (MyBatis)]
+        Entity[Entities (POJO)]
+    end
+    
+    subgraph "Infrastructure & Middleware (基础设施)"
+        MySQL[(MySQL Database)]
+        Redis[(Redis Cache/Counter)]
+        Kafka{Kafka Message Queue}
+        ES[(Elasticsearch Search Engine)]
+        Quartz((Quartz Scheduler))
+        Kaptcha[Kaptcha Image]
+        Qiniu[Qiniu Cloud Storage]
+    end
+
+    User -->|HTTP Request| Controller
+    Controller --> Interceptor
+    Controller --> Service
+    Service --> Aspect
+    Service --> Sensitive
+    Service --> DAO
+    DAO --> MySQL
+    
+    Service -->|Cache / Counter| Redis
+    Service -->|Async Notification / Search Sync| Kafka
+    Kafka -->|Consume| Service
+    Service -->|Search / Index| ES
+    Quartz -->|Scheduled Jobs| Service
+    
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef storage fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef component fill:#fff3e0,stroke:#ff6f00,stroke-width:2px;
+    
+    class MySQL,Redis,ES,Kafka,Qiniu storage;
+    class Controller,Service,DAO component;
